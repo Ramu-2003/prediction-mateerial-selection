@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Material Strength Prediction Report</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Roboto', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            color: #0d47a1;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem;
+        }
+
+        .report-container {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+            max-width: 800px;
+            width: 100%;
+            border: 1px solid rgba(2, 136, 209, 0.1);
+        }
+
+        .report-header {
+            margin-bottom: 1.5rem;
+        }
+
+        .report-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #0288d1;
+            text-align: center;
+        }
+
+        .report-timestamp {
+            font-size: 0.9rem;
+            color: #1976d2;
+            text-align: center;
+            display: block;
+            margin-top: 0.5rem;
+        }
+
+        .report-section {
+            margin-bottom: 2rem;
+        }
+
+        .report-section h3 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #0288d1;
+            margin-bottom: 1rem;
+        }
+
+        .flashcard {
+            background: linear-gradient(135deg, #f5faff, #e3f2fd);
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+            border: 1px solid #bbdefb;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .flashcard:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(2, 136, 209, 0.2);
+        }
+
+        .report-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .report-item {
+            display: flex;
+            flex-direction: column;
+            padding: 0.5rem;
+            transition: background 0.3s ease;
+            cursor: pointer;
+        }
+
+        .report-item:hover {
+            background: rgba(2, 136, 209, 0.05);
+            border-radius: 8px;
+        }
+
+        .report-label {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #1976d2;
+        }
+
+        .report-value {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #0d47a1;
+            margin-top: 0.3rem;
+        }
+
+        .rating-card {
+            background: linear-gradient(135deg, #4FC3F7, #0288D1);
+            padding: 1.5rem;
+            border-radius: 16px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+            text-align: center;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease;
+            min-height: 120px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .rating-card:hover {
+            transform: scale(1.1);
+            box-shadow: 0 12px 30px rgba(2, 136, 209, 0.4);
+            background: linear-gradient(135deg, #29B6F6, #0277BD);
+        }
+
+        .rating-card .report-label {
+            color: white;
+            font-weight: 600;
+            margin-bottom: 0.8rem;
+            font-size: 1.1rem;
+        }
+
+        .rating-card .stars {
+            font-size: 1.5rem;
+            color: #FFD700;
+            animation: pulse 1.5s infinite alternate;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.1); }
+        }
+
+        .visualization-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            justify-content: center;
+        }
+
+        .image-wrapper {
+            width: 100%;
+            max-width: 300px;
+        }
+
+        .image-wrapper img {
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn {
+            padding: 0.8rem 1.5rem;
+            background: linear-gradient(135deg, #0288d1, #4fc3f7);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: block;
+            width: 100%;
+            text-align: center;
+            margin-top: 1rem;
+        }
+
+        .btn:hover {
+            background: linear-gradient(135deg, #0277bd, #29b6f6);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(2, 136, 209, 0.3);
+        }
+
+        .back-btn {
+            background: none;
+            color: #0288d1;
+            border: 2px solid #0288d1;
+            margin-top: 1rem;
+        }
+
+        .back-btn:hover {
+            background: rgba(2, 136, 209, 0.1);
+        }
+
+        @media (max-width: 600px) {
+            .report-container {
+                padding: 1.5rem;
+            }
+
+            .report-title {
+                font-size: 1.5rem;
+            }
+
+            .report-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .image-wrapper {
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="report-container">
+        <div class="report-header">
+            <h2 class="report-title">Material Selection Report</h2>
+            <span class="report-timestamp" id="reportTimestamp"></span>
+        </div>
+        <div class="report-section" id="predictionSection">
+            <h3>Prediction Results</h3>
+            <div class="flashcard">
+                <div class="report-grid" id="predictionGrid"></div>
+            </div>
+        </div>
+        <div class="report-section">
+            <h3>Material Properties Visualization</h3>
+            <div class="visualization-container">
+                <div class="image-wrapper">
+                    <img id="viz1" src="https://i.pinimg.com/736x/1a/d5/48/1ad5487036c1dd433ff03d70e7eb11c6.jpg" alt="Strength Bar Plot">
+                </div>
+                <div class="image-wrapper">
+                    <img id="viz2" src="https://i.pinimg.com/736x/f8/93/8e/f8938e3b9b41595ece12b9f679eb10e7.jpg" alt="Elastic Modulus Histogram">
+                </div>
+            </div>
+        </div>
+        <button class="btn" id="downloadBtn">
+            <i class="fas fa-download"></i> Download Report as PDF
+        </button>
+        <button class="btn back-btn" id="backBtn">
+            Back to Dashboard
+        </button>
+    </div>
+
+    <script>
+        const { jsPDF } = window.jspdf;
+        const predictionGrid = document.getElementById('predictionGrid');
+        const reportTimestamp = document.getElementById('reportTimestamp');
+        const params = new URLSearchParams(window.location.search);
+        const timestamp = new Date().toLocaleString();
+        reportTimestamp.textContent = `Generated: ${timestamp}`;
+
+        // Fetch data from URL parameters, fallback to localStorage if missing
+        const reportData = {
+            industry: params.get('industry') || JSON.parse(localStorage.getItem('materialData'))?.industry || 'N/A',
+            material: params.get('material') || JSON.parse(localStorage.getItem('materialData'))?.material || 'N/A',
+            su: params.get('su') || JSON.parse(localStorage.getItem('materialData'))?.su || 'N/A',
+            sy: params.get('sy') || JSON.parse(localStorage.getItem('materialData'))?.sy || 'N/A',
+            e: params.get('e') || JSON.parse(localStorage.getItem('materialData'))?.e || 'N/A',
+            g: params.get('g') || JSON.parse(localStorage.getItem('materialData'))?.g || 'N/A',
+            mu: params.get('mu') || JSON.parse(localStorage.getItem('materialData'))?.mu || 'N/A',
+            ro: params.get('ro') || JSON.parse(localStorage.getItem('materialData'))?.ro || 'N/A',
+            customParameter: params.get('customParameter') || JSON.parse(localStorage.getItem('materialData'))?.customParameter || 'N/A',
+            rating: params.get('rating') || JSON.parse(localStorage.getItem('materialData'))?.rating || 'N/A'
+        };
+
+        // Generate star rating HTML
+        const generateStars = (rating) => {
+            let stars = '';
+            const ratingNum = parseInt(rating, 10);
+            for (let i = 1; i <= 5; i++) {
+                stars += i <= ratingNum ? '<i class="fas fa-star"></i>' : '<i class="far fa-star"></i>';
+            }
+            return stars;
+        };
+
+        // Populate prediction grid with all user-entered values
+        const details = [
+            { label: 'Industry', value: reportData.industry },
+            { label: 'Material', value: reportData.material },
+            { label: 'Ultimate Strength (Su)', value: `${reportData.su} MPa` },
+            { label: 'Yield Strength (Sy)', value: `${reportData.sy} MPa` },
+            { label: 'Elastic Modulus (E)', value: `${reportData.e} MPa` },
+            { label: 'Shear Modulus (G)', value: `${reportData.g} MPa` },
+            { label: 'Poisson\'s Ratio (μ)', value: reportData.mu },
+            { label: 'Density (Ro)', value: `${reportData.ro} kg/m³` },
+            { label: 'Custom Parameter', value: reportData.customParameter },
+            { label: 'Rating', value: generateStars(reportData.rating), isRating: true }
+        ];
+
+        predictionGrid.innerHTML = details.map(item => {
+            if (item.isRating) {
+                return `
+                    <div class="report-item rating-card">
+                        <span class="report-label">${item.label}</span>
+                        <span class="stars">${item.value}</span>
+                    </div>
+                `;
+            } else {
+                return `
+                    <div class="report-item">
+                        <span class="report-label">${item.label}</span>
+                        <span class="report-value">${item.value}</span>
+                    </div>
+                `;
+            }
+        }).join('');
+
+        // Fetch image as blob and convert to base64
+        const fetchImageAsBase64 = async (url) => {
+            try {
+                const proxyUrl = `https://cors-anywhere.herokuapp.com/${url}`;
+                const response = await fetch(proxyUrl);
+                if (!response.ok) throw new Error(`Failed to fetch image: ${response.status}`);
+                const blob = await response.blob();
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onloadend = () => resolve(reader.result);
+                    reader.onerror = reject;
+                    reader.readAsDataURL(blob);
+                });
+            } catch (error) {
+                console.error('Error fetching image:', error);
+                throw error;
+            }
+        };
+
+        // Download PDF functionality with visualizations from src
+        document.getElementById('downloadBtn').addEventListener('click', async () => {
+            const doc = new jsPDF();
+            const margin = 10;
+            let y = margin;
+
+            // Header
+            doc.setFontSize(18);
+            doc.setTextColor(2, 136, 209);
+            doc.text("Material Selection Report", margin, y);
+            y += 10;
+            doc.setLineWidth(0.5);
+            doc.line(margin, y, 200 - margin, y);
+            y += 10;
+
+            // Timestamp
+            doc.setFontSize(10);
+            doc.setTextColor(33, 33, 33);
+            doc.text(`Generated: ${timestamp}`, margin, y);
+            y += 10;
+
+            // Prediction Results Section
+            doc.setFontSize(14);
+            doc.setTextColor(79, 195, 247);
+            doc.text("Prediction Results", margin, y);
+            y += 7;
+            doc.setFontSize(12);
+            doc.setTextColor(13, 71, 161);
+            details.forEach(item => {
+                const value = item.isRating ? `${reportData.rating}/5` : item.value;
+                doc.text(`${item.label}: ${value}`, margin, y);
+                y += 7;
+            });
+            y += 10;
+
+            // Visualizations Section
+            doc.setFontSize(14);
+            doc.setTextColor(79, 195, 247);
+            doc.text("Material Properties Visualization", margin, y);
+            y += 10;
+
+            const img1Url = document.getElementById('viz1').src;
+            const img2Url = document.getElementById('viz2').src;
+
+            try {
+                const img1Data = await fetchImageAsBase64(img1Url);
+                console.log('Image 1 loaded as base64');
+                doc.addImage(img1Data, 'PNG', margin, y, 90, 60);
+                y += 70;
+                const img2Data = await fetchImageAsBase64(img2Url);
+                console.log('Image 2 loaded as base64');
+                doc.addImage(img2Data, 'PNG', margin, y, 90, 60);
+            } catch (error) {
+                console.error('Error adding visualizations to PDF:', error);
+                doc.setFontSize(12);
+                doc.setTextColor(13, 71, 161);
+                doc.text("Error: Visualizations could not be included", margin, y);
+            }
+
+            doc.save('Material_Selection_Report.pdf');
+        });
+
+        // Back to Dashboard button functionality
+        document.getElementById('backBtn').addEventListener('click', () => {
+            try {
+                window.location.href = 'dashboard.html';
+                console.log('Navigating to dashboard.html');
+            } catch (error) {
+                console.error('Error navigating to dashboard:', error);
+                alert('Unable to navigate to dashboard. Please check if dashboard.html exists in the same directory.');
+            }
+        });
+    </script>
+</body>
+</html>
